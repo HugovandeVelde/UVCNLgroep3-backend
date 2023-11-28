@@ -1,0 +1,25 @@
+{
+  "name": "ex1",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "./node_modules/nodemon/bin/nodemon.js start.js",
+    "dev win": "./node_modules/.bin/nodemon start.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.0.2",
+    "express": "^4.17.1",
+    "mysql": "^2.18.1",
+    "mysql3": "^0.6.0",
+    "sequelize": "^6.35.1",
+    "sqlite": "^5.1.1",
+    "sqlite3": "https://github.com/tryghost/node-sqlite3/tarball/master"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
