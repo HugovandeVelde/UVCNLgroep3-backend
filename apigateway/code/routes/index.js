@@ -2,9 +2,17 @@ import express from 'express';
 import sqlite3 from 'sqlite3';
 
 const app = express();
-const port = 4000;
+const port = 4002;
 
 const db = new sqlite3.Database('users.db');
+
+// Middleware to allow all origins
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  next();
+});
 
 // Create users table (if not exists)
 db.serialize(() => {
@@ -12,7 +20,7 @@ db.serialize(() => {
 
   // Insert sample user data
   const sampleUserData = [
-    { name: 'geeeeerard', email: 'geertje@example.com' },
+    {  },
   ];
 
   const insertUserStatement = db.prepare('INSERT INTO users (name, email) VALUES (?, ?)');
@@ -30,7 +38,7 @@ db.serialize(() => {
 
   // Insert sample recipe data
   const sampleRecipeData = [
-    { creator_id: 1, name: 'Spaghetti Bolognese' },
+    { },
   ];
 
   const insertRecipeStatement = db.prepare('INSERT INTO recipes (creator_id, name) VALUES (?, ?)');
