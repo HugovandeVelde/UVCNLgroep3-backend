@@ -91,18 +91,22 @@ app.get('/recipes', (req, res) => {
 });
 
 // Add a new recipe
-app.post('/recipes', (req, res) => {
-  const { creator_id, name } = req.body;
-  if (!creator_id || !name) {
-    res.status(400).json({ error: 'Please provide creator_id and name' });
+app.post('/users', (req, res) => {
+  const { name, email, password } = req.body;
+  
+  // Ensure all necessary fields are provided
+  if (!name || !email || !password) {
+    res.status(400).json({ error: 'Please provide name, email, and password' });
     return;
   }
-  db.run('INSERT INTO recipes (creator_id, name) VALUES (?, ?)', [creator_id, name], function (err) {
+
+  // Insert the new user into the database
+  db.run('INSERT INTO users (name, email, password) VALUES (?, ?, ?)', [name, email, password], function (err) {
     if (err) {
       res.status(500).json({ error: err.message });
       return;
     }
-    res.json({ message: 'Recipe added', recipeId: this.lastID });
+    res.json({ message: 'User registered', userId: this.lastID });
   });
 });
 
