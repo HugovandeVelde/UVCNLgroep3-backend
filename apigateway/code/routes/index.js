@@ -2,9 +2,17 @@ import express from 'express';
 import sqlite3 from 'sqlite3';
 
 const app = express();
-const port = 4000;
+const port = 4002;
 
 const db = new sqlite3.Database('users.db');
+
+// Middleware to allow all origins
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  next();
+});
 
 // Create users table (if not exists)
 db.serialize(() => {
@@ -12,7 +20,7 @@ db.serialize(() => {
 
   // Insert sample user data
   const sampleUserData = [
-    { name: 'geeeeerard', email: 'geertje@example.com' },
+    {  },
   ];
 
   const insertUserStatement = db.prepare('INSERT INTO users (name, email) VALUES (?, ?)');
@@ -30,7 +38,7 @@ db.serialize(() => {
 
   // Insert sample recipe data
   const sampleRecipeData = [
-    { creator_id: 1, name: 'Spaghetti Bolognese' },
+    { },
   ];
 
   const insertRecipeStatement = db.prepare('INSERT INTO recipes (creator_id, name) VALUES (?, ?)');
@@ -83,18 +91,22 @@ app.get('/recipes', (req, res) => {
 });
 
 // Add a new recipe
-app.post('/recipes', (req, res) => {
-  const { creator_id, name } = req.body;
-  if (!creator_id || !name) {
-    res.status(400).json({ error: 'Please provide creator_id and name' });
+app.post('/users', (req, res) => {
+  const { name, email, password } = req.body;
+  
+  // Ensure all necessary fields are provided
+  if (!name || !email || !password) {
+    res.status(400).json({ error: 'Please provide name, email, and password' });
     return;
   }
-  db.run('INSERT INTO recipes (creator_id, name) VALUES (?, ?)', [creator_id, name], function (err) {
+
+  // Insert the new user into the database
+  db.run('INSERT INTO users (name, email, password) VALUES (?, ?, ?)', [name, email, password], function (err) {
     if (err) {
       res.status(500).json({ error: err.message });
       return;
     }
-    res.json({ message: 'Recipe added', recipeId: this.lastID });
+    res.json({ message: 'User registered', userId: this.lastID });
   });
 });
 
