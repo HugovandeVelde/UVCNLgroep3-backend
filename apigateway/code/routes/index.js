@@ -14,59 +14,76 @@ app.use((req, res, next) => {
   next();
 });
 
-// Create users table (if not exists)
-// db.serialize(() => {
-//   db.run("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, email TEXT)");
+// Drop existing tables
+db.serialize(() => {
+  db.run("DROP TABLE IF EXISTS users");
+  db.run("DROP TABLE IF EXISTS recipes");
+  db.run("DROP TABLE IF EXISTS ingredients");
+});
 
-//   // Insert sample user data
-//   const sampleUserData = [
-//     {  },
-//   ];
+// Create users table
+db.serialize(() => {
+  db.run("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, email TEXT, password TEXT)");
 
-//   const insertUserStatement = db.prepare('INSERT INTO users (name, email) VALUES (?, ?)');
+  // Insert sample user data
+  const sampleUserData = [
+    { name: 'Alice', email: 'alice@example.com', password: 'Alice' },
+    { name: 'Bob', email: 'bob@example.com', password: 'Bob' },
+    { name: 'Charlie', email: 'charlie@example.com', password: 'Charlie' },
+    { name: 'Klaasie', email: 'klaasie@example.com', password: 'Klaasie' },
+    { name: 'geerard', email: 'geerard@example.com', password: 'Geerard' },
+  ];
 
-//   for (const data of sampleUserData) {
-//     insertUserStatement.run(data.name, data.email);
-//   }
+  const insertUserStatement = db.prepare('INSERT INTO users (name, email, password) VALUES (?, ?, ?)');
 
-//   insertUserStatement.finalize();
-// });
+  for (const data of sampleUserData) {
+    insertUserStatement.run(data.name, data.email, data.password);
+  }
 
-// Create recipes table (if not exists)
-// db.serialize(() => {
-//   db.run("CREATE TABLE IF NOT EXISTS recipes (id INTEGER PRIMARY KEY AUTOINCREMENT, creator_id INTEGER, name TEXT)");
+  insertUserStatement.finalize();
+});
 
-//   // Insert sample recipe data
-//   const sampleRecipeData = [
-//     { },
-//   ];
+// Create recipes table
+db.serialize(() => {
+  db.run("CREATE TABLE IF NOT EXISTS recipes (id INTEGER PRIMARY KEY AUTOINCREMENT, creator_id INTEGER, name TEXT)");
 
-//   const insertRecipeStatement = db.prepare('INSERT INTO recipes (creator_id, name) VALUES (?, ?)');
+  // Insert sample recipe data
+  const sampleRecipeData = [
+    { creator_id: 1, name: 'Spaghetti Bolognese' },
+    { creator_id: 2, name: 'Chicken Alfredo' },
+  ];
 
-//   for (const data of sampleRecipeData) {
-//     insertRecipeStatement.run(data.creator_id, data.name);
-//   }
+  const insertRecipeStatement = db.prepare('INSERT INTO recipes (creator_id, name) VALUES (?, ?)');
 
-//   insertRecipeStatement.finalize();
-// });
+  for (const data of sampleRecipeData) {
+    insertRecipeStatement.run(data.creator_id, data.name);
+  }
 
-// Create recipes table (if not exists)
-// db.serialize(() => {
-//   db.run("CREATE TABLE IF NOT EXISTS ingredients (ingredientId INTEGER PRIMARY KEY AUTOINCREMENT, recipeId INTEGER, Hoeveelheid TEXT, ingredientName TEXT)");
+  insertRecipeStatement.finalize();
+});
 
-//   // Insert sample recipe data
-//   const sampleRecipeData = [
-//     { },
-//   ];
+// Create ingredients table
+db.serialize(() => {
+  db.run("CREATE TABLE IF NOT EXISTS ingredients (ingredientId INTEGER PRIMARY KEY AUTOINCREMENT, recipeId INTEGER, Hoeveelheid TEXT, ingredientName TEXT)");
 
-//   const insertRecipeStatement = db.prepare('INSERT INTO ingredients (ingredientId, recipeId, Hoeveelheid, ingredientName) VALUES (?, ?, ?, ?)');
+  // Insert sample ingredient data
+  const sampleIngredientData = [
+    { recipeId: 1, Hoeveelheid: '200g', ingredientName: 'Spaghetti' },
+    { recipeId: 1, Hoeveelheid: '300g', ingredientName: 'Ground beef' },
+    { recipeId: 1, Hoeveelheid: '1 cup', ingredientName: 'Tomato sauce' },
+    { recipeId: 2, Hoeveelheid: '250g', ingredientName: 'Chicken breast' },
+    { recipeId: 2, Hoeveelheid: '1 cup', ingredientName: 'Alfredo sauce' },
+    { recipeId: 2, Hoeveelheid: '200g', ingredientName: 'Fettuccine pasta' },
+  ];
 
-//   for (const data of sampleRecipeData) {
-//     insertRecipeStatement.run(data.ingredientId, data.recipeId, data.Hoeveelheid, data.ingredientName);
-//   }
+  const insertIngredientStatement = db.prepare('INSERT INTO ingredients (recipeId, Hoeveelheid, ingredientName) VALUES (?, ?, ?)');
 
-//   insertRecipeStatement.finalize();
-// });
+  for (const data of sampleIngredientData) {
+    insertIngredientStatement.run(data.recipeId, data.Hoeveelheid, data.ingredientName);
+  }
+
+  insertIngredientStatement.finalize();
+});
 
 app.use(express.json());
 
@@ -85,7 +102,7 @@ app.get('/users', (req, res) => {
 app.post('/users', (req, res) => {
   const { name, email, password } = req.body;
   if (!name || !email || !password) {
-    res.status(400).json({ error: 'Please provide name and email' });
+    res.status(400).json({ error: 'Please provide name, email, and password' });
     return;
   }
   db.run('INSERT INTO users (name, email, password) VALUES (?, ?, ?)', [name, email, password], function (err) {
@@ -96,9 +113,10 @@ app.post('/users', (req, res) => {
     res.json({ message: 'User added', userId: this.lastID });
   });
 });
-// Get all ingredient
+
+// Get all ingredients
 app.get('/ingredients', (req, res) => {
-  db.all('SELECT * FROM recipeIngredients', (err, rows) => {
+  db.all('SELECT * FROM ingredients', (err, rows) => {
     if (err) {
       res.status(500).json({ error: err.message });
       return;
