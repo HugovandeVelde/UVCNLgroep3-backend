@@ -19,6 +19,43 @@ db.serialize(() => {
   db.run("DROP TABLE IF EXISTS users");
   db.run("DROP TABLE IF EXISTS recipes");
   db.run("DROP TABLE IF EXISTS ingredients");
+  db.run("DROP TABLE IF EXISTS recipeSteps");
+});
+
+// Create users table
+db.serialize(() => {
+  db.run("CREATE TABLE IF NOT EXISTS recipeSteps (id INTEGER PRIMARY KEY AUTOINCREMENT, recipeId INTEGER, instructie TEXT, stepNr INTEGER)");
+
+  // Insert sample user data
+  const sampleUserData = [
+    { recipeId: '1', instructie: 'Kook spaghetti volgens de aanwijzingen op de verpakking.', stepNr: '1' },
+    { recipeId: '1', instructie: 'Verhit olie in een pan, bak gehakt rul. Voeg gesnipperde ui en knoflook toe.', stepNr: '2' },
+    { recipeId: '1', instructie: 'Voeg tomatensaus, tomatenpuree, Italiaanse kruiden, zout en peper toe. Laat sudderen.', stepNr: '3' },
+    { recipeId: '1', instructie: 'Serveer de saus over de gekookte spaghetti.', stepNr: '4' },
+    { recipeId: '2', instructie: 'Kook fettuccine volgens de instructies op de verpakking.', stepNr: '1' },
+    { recipeId: '2', instructie: 'Bak stukjes kip in boter tot ze gaar zijn. Voeg room en geraspte Parmezaanse kaas toe.', stepNr: '2' },
+    { recipeId: '2', instructie: 'Roer tot de kaas gesmolten is en de saus is ingedikt. Meng met de gekookte fettuccine.', stepNr: '3' },
+    { recipeId: '3', instructie: 'Kook spaghetti en bak spekjes krokant.', stepNr: '1' },
+    { recipeId: '3', instructie: 'Meng eieren, geraspte Parmezaanse kaas en peper in een kom.', stepNr: '2' },
+    { recipeId: '3', instructie: 'Giet de gekookte spaghetti af, meng met de spekjes en roer het eimengsel erdoor.', stepNr: '3' },
+    { recipeId: '4', instructie: 'Snijd kip in reepjes en roerbak in olie tot ze gaar zijn.', stepNr: '1' },
+    { recipeId: '4', instructie: 'Voeg gesneden groenten toe (bijv. broccoli, paprika, wortels).', stepNr: '2' },
+    { recipeId: '4', instructie: 'Voeg sojasaus, gember en knoflook toe. Roerbak tot de groenten knapperig zijn.', stepNr: '3' },
+    { recipeId: '5', instructie: 'Rol pizzadeeg uit op een bakplaat.', stepNr: '1' },
+    { recipeId: '5', instructie: 'Bestrijk met tomatensaus, beleg met plakjes mozzarella en tomaten.', stepNr: '2' },
+    { recipeId: '5', instructie: 'Besprenkel met olijfolie, voeg zout en basilicum toe. Bak volgens de instructies op het deegpakket.', stepNr: '3' },
+    { recipeId: '6', instructie: 'Bak groenten zoals paprika, ui, champignons.', stepNr: '1' },
+    { recipeId: '6', instructie: 'Voeg bonen toe en breng op smaak met taco-kruiden.', stepNr: '2' },
+    { recipeId: '6', instructie: 'Vul tacos met het groentenmengsel en voeg toppings toe zoals sla, tomaat, kaas en guacamole.', stepNr: '3' },
+  ];
+
+  const insertUserStatement = db.prepare('INSERT INTO recipeSteps (recipeId, instructie, stepNr) VALUES (?, ?, ?)');
+
+  for (const data of sampleUserData) {
+    insertUserStatement.run(data.recipeId, data.instructie, data.stepNr);
+  }
+
+  insertUserStatement.finalize();
 });
 
 // Create users table
@@ -51,6 +88,10 @@ db.serialize(() => {
   const sampleRecipeData = [
     { creator_id: 1, name: 'Spaghetti Bolognese' },
     { creator_id: 2, name: 'Chicken Alfredo' },
+    { creator_id: 1, name: 'Spaghetti Carbonara' },
+    { creator_id: 3, name: 'Chicken Stir-Fry' },
+    { creator_id: 4, name: 'Margherita Pizza' },
+    { creator_id: 5, name: 'Vegetarian Tacos' },
   ];
 
   const insertRecipeStatement = db.prepare('INSERT INTO recipes (creator_id, name) VALUES (?, ?)');
@@ -69,12 +110,33 @@ db.serialize(() => {
   // Insert sample ingredient data
   const sampleIngredientData = [
     { recipeId: 1, Hoeveelheid: '200g', ingredientName: 'Spaghetti' },
-    { recipeId: 1, Hoeveelheid: '300g', ingredientName: 'Ground beef' },
-    { recipeId: 1, Hoeveelheid: '1 cup', ingredientName: 'Tomato sauce' },
-    { recipeId: 2, Hoeveelheid: '250g', ingredientName: 'Chicken breast' },
+    { recipeId: 1, Hoeveelheid: '300g', ingredientName: 'Gehakt' },
+    { recipeId: 1, Hoeveelheid: '1 cup', ingredientName: 'Tomaten saus' },
+    { recipeId: 2, Hoeveelheid: '250g', ingredientName: 'Kip filet' },
     { recipeId: 2, Hoeveelheid: '1 cup', ingredientName: 'Alfredo sauce' },
     { recipeId: 2, Hoeveelheid: '200g', ingredientName: 'Fettuccine pasta' },
-  ];
+    { recipeId: 3, Hoeveelheid: '200g', ingredientName: 'Spaghetti' },
+    { recipeId: 3, Hoeveelheid: '300g', ingredientName: 'Gehakt' },
+    { recipeId: 3, Hoeveelheid: '1 cup', ingredientName: 'Tomaten saus' },
+    { recipeId: 4, Hoeveelheid: '250g', ingredientName: 'Chicken breast' },
+    { recipeId: 4, Hoeveelheid: '1 cup', ingredientName: 'Alfredo sauce' },
+    { recipeId: 4, Hoeveelheid: '200g', ingredientName: 'Fettuccine pasta' },
+    { recipeId: 5, Hoeveelheid: '1', ingredientName: 'Pizzadeeg' },
+    { recipeId: 5, Hoeveelheid: '1 cup', ingredientName: 'Tomatensaus' },
+    { recipeId: 5, Hoeveelheid: '200g', ingredientName: 'Mozzarella kaas' },
+    { recipeId: 5, Hoeveelheid: 'Verse', ingredientName: 'basilicumblaadjes' },
+    { recipeId: 5, Hoeveelheid: 'Naar smaak', ingredientName: 'Olijfolie' },
+    { recipeId: 5, Hoeveelheid: 'Naar smaak', ingredientName: 'Zout en peper' },
+    { recipeId: 6, Hoeveelheid: '1 blik', ingredientName: 'Zwarte bonen' },
+    { recipeId: 6, Hoeveelheid: '1 blik', ingredientName: 'Maïs' },
+    { recipeId: 6, Hoeveelheid: '2', ingredientName: 'Tomaten' },
+    { recipeId: 6, Hoeveelheid: '1', ingredientName: 'Avocado' },
+    { recipeId: 6, Hoeveelheid: '1', ingredientName: 'Rode ui' },
+    { recipeId: 6, Hoeveelheid: '8', ingredientName: 'Tortillas' },
+    { recipeId: 6, Hoeveelheid: '1 theelepel', ingredientName: 'Komijn' },
+    { recipeId: 6, Hoeveelheid: 'Naar smaak', ingredientName: 'Koriander' }
+];
+  
 
   const insertIngredientStatement = db.prepare('INSERT INTO ingredients (recipeId, Hoeveelheid, ingredientName) VALUES (?, ?, ?)');
 
