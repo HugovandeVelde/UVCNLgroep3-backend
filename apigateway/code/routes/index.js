@@ -350,6 +350,17 @@ app.get("/ingredients", (req, res) => {
   });
 });
 
+// Get all steps
+app.get("/steps", (req, res) => {
+  db.all("SELECT * FROM recipeSteps", (err, rows) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+      return;
+    }
+    res.json(rows);
+  });
+});
+
 // Get all recipes
 app.get("/recipes", (req, res) => {
   db.all("SELECT * FROM recipes", (err, rows) => {
