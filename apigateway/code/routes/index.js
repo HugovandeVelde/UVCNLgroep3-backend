@@ -2,7 +2,6 @@ import express from "express";
 import sqlite3 from "sqlite3";
 
 const app = express();
-
 const port = 4005;
 
 const db = new sqlite3.Database("users.db");
@@ -307,9 +306,8 @@ db.serialize(() => {
   insertIngredientStatement.finalize();
 });
 
->>>>>>> 67432091587dc1db6dda027dcf751472e61e7765
 app.use(express.json());
- 
+
 // Get all users
 app.get("/users", (req, res) => {
   db.all("SELECT * FROM users", (err, rows) => {
@@ -320,7 +318,7 @@ app.get("/users", (req, res) => {
     res.json(rows);
   });
 });
- 
+
 // Add a new user
 app.post("/users", (req, res) => {
   const { name, email, password } = req.body;
@@ -362,7 +360,7 @@ app.get("/recipes", (req, res) => {
     res.json(rows);
   });
 });
- 
+
 // Add a new recipe
 app.post("/recipes", (req, res) => {
   const { creator_id, name } = req.body;
@@ -382,7 +380,7 @@ app.post("/recipes", (req, res) => {
     }
   );
 });
- 
+
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });
