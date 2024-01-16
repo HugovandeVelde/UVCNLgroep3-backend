@@ -2,7 +2,7 @@ import express from "express";
 import sqlite3 from "sqlite3";
 
 const app = express();
-const port = 4005;
+const port = 4006;
 
 const db = new sqlite3.Database("users.db");
 
@@ -347,7 +347,7 @@ app.get("/ingredients", (req, res) => {
       return;
     }
     res.json(rows);
-  });
+  }); 
 });
 
 // Get all steps
