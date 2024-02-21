@@ -1,12 +1,12 @@
 version: '3.8'
 services:
-  users:
-    container_name: msusers
-    build: ./user
+  friends:
+    container_name: msfriends
+    build: ./friends
     volumes:
-      - ./users/code:/usr/src/app
+      - ./friends/code:/usr/src/app
     networks:
-      - msveterinarian
+      - msuvcnl
     ports:
       - "3010:3010"
     working_dir: /usr/src/app
@@ -17,12 +17,12 @@ services:
     volumes:
       - ./apigateway/code:/usr/src/app
     networks:
-      - msveterinarian
+      - msuvcnl
     ports:
       - "3011:3011"
     working_dir: /usr/src/app
     command: bash -c "npm install && npm run dev"
 
 networks:
-  msveterinarian:
+  msuvcnl:
     driver: bridge

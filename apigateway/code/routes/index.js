@@ -8,9 +8,10 @@ const db = new sqlite3.Database("users.db");
 
 // Middleware to allow all origins
 app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Credentials', true);
   next();
 });
 
@@ -390,7 +391,114 @@ app.post("/recipes", (req, res) => {
       res.json({ message: "Recipe added", recipeId: this.lastID });
     }
   );
+});  
+  // Drop existing tables
+  db.serialize(() => {
+    db.run("DROP TABLE IF EXISTS friends");
+  });
+
+// Create users table
+db.serialize(() => {
+  db.run(
+    "CREATE TABLE IF NOT EXISTS friends (id INTEGER PRIMARY KEY AUTOINCREMENT, recieverID INTEGER, senderID INTEGER, status TEXT)"
+  );
+
+  // Insert sample user data
+  const sampleUserData = [
+    {
+      recieverID: "1",
+      senderID: "2",
+      status: "accepted",
+    },
+    {
+      recieverID: "1",
+      senderID: "3",
+      status: "pending",
+    },
+    {
+      recieverID: "2",
+      senderID: "4",
+      status: "accepted",
+    },
+    {
+      recieverID: "4",
+      senderID: "1",
+      status: "accepted",
+    }
+  ];
+
+  const insertUserStatement = db.prepare(
+    "INSERT INTO friends (recieverID, senderID, status) VALUES (?, ?, ?)"
+  );
+
+  for (const data of sampleUserData) {
+    insertUserStatement.run(data.recieverID, data.senderID, data.status);
+  }
+
+  insertUserStatement.finalize();
 });
+
+//GET
+app.get("/friends", (req, res) => {
+  db.all("SELECT * FROM friends", (err, rows) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+      return;
+    }
+    res.json(rows);
+  }); 
+});
+// Add a new friend
+app.post("/friends", (req, res) => {
+  const { recieverID, senderID, status } = req.body;
+  if (!recieverID || !senderID || !status) {
+    res.status(400).json({ error: "Please provide name, email, and password" });
+    return;
+  }
+  db.run(
+    "INSERT INTO friends (recieverID, senderID, status) VALUES (?, ?, ?)",
+    [recieverID, senderID, status],
+    function (err) {
+      if (err) {
+        res.status(500).json({ error: err.message });
+        return;
+      }
+      res.json({ message: "friend added"});
+    }
+  );
+});
+
+// Delete a friend
+app.delete("/friends/:id", (req, res) => {
+  const friendId = req.params.id;
+
+  // Check if the friendId is provided
+  if (!friendId) {
+    res.status(400).json({ error: "Please provide friend ID" });
+    return;
+  }
+
+  db.run(
+    "DELETE FROM friends WHERE id = ?",
+    [friendId],
+    function (err) {
+      if (err) {
+        res.status(500).json({ error: err.message });
+        return;
+      }
+
+      // Check if any rows were affected to determine if the friend existed
+      if (this.changes === 0) {
+        res.status(404).json({ error: "Friend not found" });
+        return;
+      }
+
+      res.json({ message: "Friend deleted" });
+    }
+  );
+});
+
+
 
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
